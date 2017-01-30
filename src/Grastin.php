@@ -5,6 +5,7 @@ namespace Depakespedro\Grastin;
 
 use Carbon\Carbon;
 use Mockery\CountValidator\Exception;
+use Illuminate\Support\Facades\Log;
 
 class Grastin
 {
@@ -26,6 +27,7 @@ class Grastin
     //оправка запроса на апи урл
     private function sendXML($xml)
     {
+		Log::info('Grastin sendXML : '.$xml);
         $this->send_xml = $xml;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, self::URL_API);
@@ -35,6 +37,7 @@ class Grastin
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         $responce = curl_exec($ch);
+		Log::info('Grastin responce : '.$responce);
         curl_close($ch);
         $this->responce_xml = $responce;
         return $responce;
