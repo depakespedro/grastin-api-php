@@ -5,6 +5,7 @@ namespace Depakespedro\Grastin;
 class OrderGrastin
 {
     private $args = [];
+    private $products = [];
 
     public function __construct($test = false)
     {
@@ -27,11 +28,23 @@ class OrderGrastin
     }
 
     public function convertToXML(){
+        $products_xml = '';
+        
+        foreach($this->products as $product_grastin){
+            $products_xml .= $product_grastin->convertToXML();
+        }        
+        
         $order_xml = '<Order ';
         foreach ($this->args as $key => $value) {
             $order_xml .= "$key = " . '"' . $value . '"' . ' ';
-        }
+        }       
+        
+        $order_xml .= $products_xml;
+        
         $order_xml.='/>';
+
+        dd($order_xml);
+
         return $order_xml;
     }
 
@@ -315,5 +328,11 @@ class OrderGrastin
             $this->args['tc_KPP'] = $arg;
         }
         return $this;
+    }
+    
+    public function set_goods(array $products_grastin){
+        if (!is_null($products_grastin) or !empty($products_grastin)) {
+            $this->products = $products_grastin;
+        }
     }
 }
