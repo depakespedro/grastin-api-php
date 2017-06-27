@@ -29,19 +29,21 @@ class OrderGrastin
 
     public function convertToXML(){
         $products_xml = '';
-        
+
         foreach($this->products as $product_grastin){
             $products_xml .= $product_grastin->convertToXML();
-        }        
-        
+        }
+
         $order_xml = '<Order ';
         foreach ($this->args as $key => $value) {
             $order_xml .= "$key = " . '"' . $value . '"' . ' ';
         }
 
-        $order_xml.='/>';
+        $order_xml.='>';
 
         $order_xml .= $products_xml;
+
+        $order_xml.='</Order>';
 
         return $order_xml;
     }
