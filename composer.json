@@ -9,7 +9,11 @@
       "email": "fourbit@yandex.ru"
     }
   ],
-  "require": {},
+  "require": {
+    "ext-json": "*",
+    "ext-simplexml": "*",
+    "ext-curl": "*"
+  },
   "autoload": {
     "psr-4": {
       "Depakespedro\\Grastin\\": "src/"
