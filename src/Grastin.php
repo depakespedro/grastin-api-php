@@ -1,9 +1,5 @@
-<?php
+<?php namespace Depakespedro\Grastin;
 
-
-namespace Depakespedro\Grastin;
-
-use Carbon\Carbon;
 use Mockery\CountValidator\Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -155,7 +151,7 @@ class Grastin
     }
 
     //Получение информации по заказу
-    public function orderinformationbydate(Carbon $start, Carbon $end)
+    public function orderinformationbydate(\DateTime $start, \DateTime $end)
     {
         $start = $start->format('dmY');
         $end = $end->format('dmY');
@@ -236,7 +232,7 @@ class Grastin
     }
 
     //Получение списка отчетов агента
-    public function agentreportlist(Carbon $start, Carbon $end)
+    public function agentreportlist(\DateTime $start, \DateTime $end)
     {
         $start = $start->format('dmY');
         $end = $end->format('dmY');
