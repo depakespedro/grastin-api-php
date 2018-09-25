@@ -1,6 +1,5 @@
 <?php namespace Depakespedro\Grastin;
 
-use Mockery\CountValidator\Exception;
 use Illuminate\Support\Facades\Log;
 
 class Grastin
@@ -15,27 +14,59 @@ class Grastin
 
     private $parse_xml = '';
 
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
     public function __construct($key)
     {
         $this->key = $key;
     }
 
+    /**
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    public function setLogger(\Psr\Log\LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     //оправка запроса на апи урл
     private function sendXML($xml)
     {
-		Log::info('Grastin sendXML : '.$xml);
+        if ($this->logger) {
+            $this->logger->info('Grastin sendXML : '.$xml);
+        }
+
         $this->send_xml = $xml;
+        $responce = $this->send($xml);
+
+        if ($this->logger) {
+            $this->logger->info('Grastin responce : '.$responce);
+        }
+
+        $this->responce_xml = $responce;
+        return $responce;
+    }
+
+
+    protected function send($data)
+    {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, self::URL_API);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, 'XMLPackage=' . urlencode($xml));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, 'XMLPackage=' . urlencode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         $responce = curl_exec($ch);
-		Log::info('Grastin responce : '.$responce);
+
+        if ($error = curl_errno($ch)) {
+            throw new \Exception('Grastin CUrl error: ' . curl_error($ch));
+        }
+
         curl_close($ch);
-        $this->responce_xml = $responce;
         return $responce;
     }
 
