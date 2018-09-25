@@ -1,47 +1,57 @@
 # grastin-api-php
+Неофициальный PHP-клиент для API службы доставки Грастин
 
---- Create order
+Установка
+------------
 
-$product = new ProductGrastin();
-        $product->set_amount('100')
-            ->set_article('123')
-            ->set_cost('100')
-            ->set_name('213');
+Добавить в composer.json
+```
+  "repositories": {
+    "depakespedro/grastin-api-php": {
+      "type": "vcs",
+      "url": "https://github.com/depakespedro/grastin-api-php.git"
+    }
+  }
+```
 
-$product2 = new ProductGrastin();
-        $product2->set_amount('322')
-            ->set_article('434')
-            ->set_cost('100')
-            ->set_name('432');
-
-$number = '1';
-$shippingtimefrom = '13:00';
-$shippingtimefor = '15:00';
-$shippingdate = '20062017';
-$phone1 = '89177755684';
-$summa = '100';
-$assessedsumma = '100';
-$service = '6';
-$buyer = 'rteter';
-$address = 'hgfhgf';
-$comment = 'gdfhgfh';
-$city = 'jhkjh';
-
-  $og = new OrderGrastin(true);
-  $og->set_number($number)
-      ->set_address($address)
-      ->set_comment($comment)
-      ->set_shippingtimefrom($shippingtimefrom)
-      ->set_shippingtimefor($shippingtimefor)
-      ->set_shippingdate($shippingdate)
-      ->set_buyer($buyer)
-      ->set_summa($summa)
-      ->set_assessedsumma($assessedsumma)
-      ->set_phone1($phone1)
-      ->set_service($service)
-      ->set_takewarehouse($city)
-      ->set_goods([$product,$product2]);
+Установить пакет:
+```
+    composer require depakespedro/grastin-api-php
+```
 
 
-  $grastin = new Grastin('123-123-123-123');
-  $data_responce = $grastin->newordercourier([$og]);
+Использование
+-----
+
+### Добавить заказ
+```
+    $product = new ProductGrastin();
+    $product->set_amount('100')
+        ->set_article('123')
+        ->set_cost('100')
+        ->set_name('213');
+    
+    $product2 = new ProductGrastin();
+    $product2->set_amount('322')
+        ->set_article('434')
+        ->set_cost('100')
+        ->set_name('432');
+    
+    $og = new OrderGrastin($isTest = true);
+    $og->set_number('Ваш уникальный номер заказа')
+        ->set_address('Адрес получателя')
+        ->set_comment('Комментарий курьеру')
+        ->set_shippingtimefrom('13:00')
+        ->set_shippingtimefor('15:00')
+        ->set_shippingdate('01022017') // DDMMYYYY
+        ->set_buyer('ФИО получателя')
+        ->set_summa('100') // Сумма заказ
+        ->set_assessedsumma('100') // Оценочная стоимость
+        ->set_phone1('89177755684')
+        ->set_service('6') // Код услуги, см. `\Depakespedro\Grastin\Enum\ServiceType`
+        ->set_takewarehouse('Москва') // Город отгрузки
+        ->set_goods([$product,$product2]);
+    
+    $grastin = new Grastin('API key');
+    $data_responce = $grastin->newordercourier([$og]);
+```
