@@ -63,17 +63,25 @@ class Grastin
         $responce = curl_exec($ch);
 
         if ($error = curl_errno($ch)) {
-            throw new \Exception('Grastin CUrl error: ' . curl_error($ch));
+            throw new GrastinException('Grastin CUrl error: ' . curl_error($ch));
         }
 
         curl_close($ch);
         return $responce;
     }
 
+
     //преоьраузет xml в simple xml
     private function parseXML($xml)
     {
+        $errLevel = error_reporting(0);
         $parse_xml = simplexml_load_string($xml);
+        error_reporting($errLevel);
+
+        if (false === $parse_xml) {
+            throw new GrastinException("Grastin: Failed to parse XML: " . $xml);
+        }
+
         $json = json_encode($parse_xml);
         $array = json_decode($json, TRUE);
         $this->parse_xml = $array;
@@ -85,6 +93,11 @@ class Grastin
     {
         $responce_xml = $this->sendXML($xml);
         $parse_responce_xml = $this->parseXML($responce_xml);
+
+        if (!empty($parse_responce_xml['Error'])) {
+            throw new GrastinException("Grastin Error: ". $parse_responce_xml['Error']);
+        }
+
         return $parse_responce_xml;
     }
 
