@@ -1,10 +1,5 @@
-<?php
+<?php namespace Depakespedro\Grastin;
 
-
-namespace Depakespedro\Grastin;
-
-use Carbon\Carbon;
-use Mockery\CountValidator\Exception;
 use Illuminate\Support\Facades\Log;
 
 class Grastin
@@ -19,34 +14,74 @@ class Grastin
 
     private $parse_xml = '';
 
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
     public function __construct($key)
     {
         $this->key = $key;
     }
 
+    /**
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    public function setLogger(\Psr\Log\LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     //оправка запроса на апи урл
     private function sendXML($xml)
     {
-		Log::info('Grastin sendXML : '.$xml);
+        if ($this->logger) {
+            $this->logger->info('Grastin sendXML : '.$xml);
+        }
+
         $this->send_xml = $xml;
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, self::URL_API);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, 'XMLPackage=' . urlencode($xml));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        $responce = curl_exec($ch);
-		Log::info('Grastin responce : '.$responce);
-        curl_close($ch);
+        $responce = $this->send($xml);
+
+        if ($this->logger) {
+            $this->logger->info('Grastin responce : '.$responce);
+        }
+
         $this->responce_xml = $responce;
         return $responce;
     }
 
+
+    protected function send($data)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, self::URL_API);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, 'XMLPackage=' . urlencode($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $responce = curl_exec($ch);
+
+        if ($error = curl_errno($ch)) {
+            throw new GrastinException('Grastin CUrl error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
+        return $responce;
+    }
+
+
     //преоьраузет xml в simple xml
     private function parseXML($xml)
     {
+        $errLevel = error_reporting(0);
         $parse_xml = simplexml_load_string($xml);
+        error_reporting($errLevel);
+
+        if (false === $parse_xml) {
+            throw new GrastinException("Grastin: Failed to parse XML: " . $xml);
+        }
+
         $json = json_encode($parse_xml);
         $array = json_decode($json, TRUE);
         $this->parse_xml = $array;
@@ -58,6 +93,11 @@ class Grastin
     {
         $responce_xml = $this->sendXML($xml);
         $parse_responce_xml = $this->parseXML($responce_xml);
+
+        if (!empty($parse_responce_xml['Error'])) {
+            throw new GrastinException("Grastin Error: ". $parse_responce_xml['Error']);
+        }
+
         return $parse_responce_xml;
     }
 
@@ -155,7 +195,7 @@ class Grastin
     }
 
     //Получение информации по заказу
-    public function orderinformationbydate(Carbon $start, Carbon $end)
+    public function orderinformationbydate(\DateTime $start, \DateTime $end)
     {
         $start = $start->format('dmY');
         $end = $end->format('dmY');
@@ -236,7 +276,7 @@ class Grastin
     }
 
     //Получение списка отчетов агента
-    public function agentreportlist(Carbon $start, Carbon $end)
+    public function agentreportlist(\DateTime $start, \DateTime $end)
     {
         $start = $start->format('dmY');
         $end = $end->format('dmY');
