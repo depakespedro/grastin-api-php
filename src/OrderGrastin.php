@@ -36,7 +36,7 @@ class OrderGrastin
 
         $order_xml = '<Order ';
         foreach ($this->args as $key => $value) {
-            $order_xml .= "$key = " . '"' . $value . '"' . ' ';
+            $order_xml .= "$key = " . '"' . htmlspecialchars($value) . '"' . ' ';
         }
 
         $order_xml.='>';
