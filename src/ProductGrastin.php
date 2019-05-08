@@ -40,9 +40,15 @@ class ProductGrastin
 
         return $this;
     }
-    
+
     public function convertToXML()
     {
-        return '<good article = "'.$this->article.'"'.' name = "'.$this->name.'" cost = "'.$this->cost.'" amount = "'.$this->amount.'" />';        
+        $values = array_map('htmlspecialchars', [
+            $this->article,
+            $this->name,
+            $this->cost,
+            $this->amount,
+        ]);
+        return vsprintf('<good article="%s" name="%s" cost="%s" amount="%s" />', $values);
     }
 }
